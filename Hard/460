@@ -1,0 +1,125 @@
+460 - 16_LC460_LFUCache_Hard.java 
+
+import java.util.HashMap;
+
+class LFUCache {
+
+    class Node {
+        int key, value, freq;
+        Node prev, next;
+
+        Node(int key, int value) {
+            this.key = key;
+            this.value = value;
+            this.freq = 1;
+        }
+    }
+
+    class DoublyLinkedList {
+        Node head, tail;
+        int size;
+
+        DoublyLinkedList() {
+            head = new Node(0, 0);
+            tail = new Node(0, 0);
+            head.next = tail;
+            tail.prev = head;
+            size = 0;
+        }
+
+        void add(Node node) {
+            node.next = head.next;
+            node.prev = head;
+            head.next.prev = node;
+            head.next = node;
+            size++;
+        }
+
+        void remove(Node node) {
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
+            size--;
+        }
+
+        Node removeLast() {
+            if (size == 0) return null;
+
+            Node node = tail.prev;
+            remove(node);
+            return node;
+        }
+    }
+
+    private HashMap<Integer, Node> keyMap;
+    private HashMap<Integer, DoublyLinkedList> freqMap;
+    private int capacity;
+    private int minFreq;
+
+    public LFUCache(int capacity) {
+        this.capacity = capacity;
+        minFreq = 0;
+
+        keyMap = new HashMap<>();
+        freqMap = new HashMap<>();
+    }
+
+    public int get(int key) {
+        if (!keyMap.containsKey(key)) {
+            return -1;
+        }
+
+        Node node = keyMap.get(key);
+        updateFrequency(node);
+
+        return node.value;
+    }
+
+    public void put(int key, int value) {
+        if (capacity == 0) return;
+
+        if (keyMap.containsKey(key)) {
+            Node node = keyMap.get(key);
+            node.value = value;
+            updateFrequency(node);
+            return;
+        }
+
+        if (keyMap.size() == capacity) {
+            DoublyLinkedList list = freqMap.get(minFreq);
+            Node evicted = list.removeLast();
+            keyMap.remove(evicted.key);
+
+            if (list.size == 0) {
+                freqMap.remove(minFreq);
+            }
+        }
+
+        Node newNode = new Node(key, value);
+        keyMap.put(key, newNode);
+
+        freqMap.computeIfAbsent(1, k -> new DoublyLinkedList())
+               .add(newNode);
+
+        minFreq = 1;
+    }
+
+    private void updateFrequency(Node node) {
+        int oldFreq = node.freq;
+
+        DoublyLinkedList oldList = freqMap.get(oldFreq);
+        oldList.remove(node);
+
+        if (oldList.size == 0) {
+            freqMap.remove(oldFreq);
+
+            if (minFreq == oldFreq) {
+                minFreq++;
+            }
+        }
+
+        node.freq++;
+
+        freqMap.computeIfAbsent(node.freq, k -> new DoublyLinkedList())
+               .add(node);
+    }
+}
