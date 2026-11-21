@@ -1,0 +1,37 @@
+284 - 12_LC284_PeekingIterator_Medium.java 
+
+import java.util.Iterator;
+
+class PeekingIterator implements Iterator<Integer> {
+
+    private Iterator<Integer> iterator;
+    private Integer nextElement;
+    private boolean hasPeeked;
+
+    public PeekingIterator(Iterator<Integer> iterator) {
+        this.iterator = iterator;
+        hasPeeked = false;
+    }
+
+    public Integer peek() {
+        if (!hasPeeked) {
+            nextElement = iterator.next();
+            hasPeeked = true;
+        }
+        return nextElement;
+    }
+
+    @Override
+    public Integer next() {
+        if (hasPeeked) {
+            hasPeeked = false;
+            return nextElement;
+        }
+        return iterator.next();
+    }
+
+    @Override
+    public boolean hasNext() {
+        return hasPeeked || iterator.hasNext();
+    }
+}
