@@ -1,0 +1,32 @@
+1472 - 11_LC1472_DesignBrowserHistory_Medium.java 
+
+import java.util.ArrayList;
+
+class BrowserHistory {
+    ArrayList<String> history;
+    int current;
+
+    public BrowserHistory(String homepage) {
+        history = new ArrayList<>();
+        history.add(homepage);
+        current = 0;
+    }
+
+    public void visit(String url) {
+        // Clear forward history
+        history.subList(current + 1, history.size()).clear();
+
+        history.add(url);
+        current++;
+    }
+
+    public String back(int steps) {
+        current = Math.max(0, current - steps);
+        return history.get(current);
+    }
+
+    public String forward(int steps) {
+        current = Math.min(history.size() - 1, current + steps);
+        return history.get(current);
+    }
+}
